@@ -1,0 +1,8 @@
+{
+  "uuid": "ctrlv@abulgit",
+  "name": "CtrlV",
+  "description": "Clipboard history like Windows' Win+V. Press Super+V to open it at the text cursor, pick an item, and it is pasted into the app you were using.",
+  "shell-version": ["51"],
+  "url": "https://github.com/abulgit/ctrlv",
+  "settings-schema": "org.gnome.shell.extensions.ctrlv"
+}

@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schemalist>
+  <schema id="org.gnome.shell.extensions.ctrlv" path="/org/gnome/shell/extensions/ctrlv/">
+    <key name="ctrlv-shortcut" type="as">
+      <default><![CDATA[['<Super>v']]]></default>
+      <summary>Shortcut that opens and closes the popup</summary>
+    </key>
+    <key name="takeover-shortcut" type="b">
+      <default>true</default>
+      <summary>Take the shortcut from GNOME's notification list</summary>
+      <description>GNOME opens the notification list with Super+V and Super+M. While the extension is on, it keeps only the accelerators that don't clash with ours. Nothing is written to GNOME's settings.</description>
+    </key>
+    <key name="history-size" type="i">
+      <range min="1" max="100"/>
+      <default>10</default>
+      <summary>Number of items to keep, not counting pins</summary>
+    </key>
+    <key name="persist-history" type="b">
+      <default>true</default>
+      <summary>Keep the history after a restart</summary>
+      <description>When off, only pinned items survive a restart, as on Windows.</description>
+    </key>
+    <key name="private-mode" type="b">
+      <default>false</default>
+      <summary>Stop recording what you copy</summary>
+    </key>
+    <key name="excluded-apps" type="as">
+      <default>['org.keepassxc.KeePassXC', 'com.bitwarden.desktop', 'org.gnome.World.Secrets', '1password']</default>
+      <summary>App IDs whose copies are never recorded</summary>
+    </key>
+    <key name="terminal-apps" type="as">
+      <default>['org.gnome.Ptyxis', 'org.gnome.Terminal', 'org.gnome.Console', 'com.mitchellh.ghostty', 'org.wezfurlong.wezterm', 'kitty', 'Alacritty', 'foot', 'com.raggesilver.BlackBox', 'org.kde.konsole', 'xterm']</default>
+      <summary>App IDs that paste with Ctrl+Shift+V</summary>
+    </key>
+  </schema>
+</schemalist>

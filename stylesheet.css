@@ -1,0 +1,71 @@
+.ctrlv-popup {
+  width: 360px;
+  max-height: 460px;
+  padding: 12px;
+  spacing: 10px;
+}
+
+.ctrlv-header {
+  spacing: 6px;
+}
+
+.ctrlv-title {
+  font-weight: bold;
+}
+
+.ctrlv-header .button {
+  padding: 3px 12px;
+}
+
+.ctrlv-search StIcon,
+.ctrlv-files StIcon {
+  icon-size: 16px;
+}
+
+.ctrlv-list {
+  spacing: 6px;
+}
+
+.ctrlv-popup StScrollBar {
+  padding-left: 6px;
+}
+
+/* Scrolled lists lay rows out at their minimum height, which the theme's .button would cap at one line. */
+.ctrlv-item {
+  min-height: auto;
+  font-weight: normal;
+  text-align: left;
+  padding: 10px 6px 10px 14px;
+  border-radius: 12px;
+}
+
+.ctrlv-item:selected {
+  box-shadow: inset 0 0 0 2px -st-accent-color;
+}
+
+.ctrlv-actions {
+  spacing: 2px;
+  margin-left: 6px;
+}
+
+.ctrlv-action {
+  padding: 6px;
+  background-color: transparent;
+}
+
+.ctrlv-action:checked {
+  color: -st-accent-color;
+}
+
+.ctrlv-files {
+  spacing: 10px;
+}
+
+.ctrlv-empty {
+  padding: 48px 0;
+  spacing: 12px;
+}
+
+.ctrlv-empty StIcon {
+  icon-size: 48px;
+}
