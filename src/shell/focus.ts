@@ -11,8 +11,8 @@ export interface Rect {
     height: number;
 }
 
-// @girs types inputMethod as any.
-const inputMethod = () => Main.inputMethod as Clutter.InputMethod;
+// @girs types inputMethod as any. currentFocus is set while an app or shell entry takes text input.
+export const inputMethod = () => Main.inputMethod as Clutter.InputMethod & {currentFocus: Clutter.InputFocus | null};
 
 // @girs misses that nothing has focus on the desktop or in the overview.
 export function focusWindow(): Meta.Window | null {
@@ -23,7 +23,7 @@ export function focusedAppId(): string | null {
     const window = focusWindow();
     if (!window)
         return null;
-    return Shell.WindowTracker.get_default().get_window_app(window)?.get_id()?.replace(/\.desktop$/, '') ?? null;
+    return Shell.WindowTracker.get_default().get_window_app(window).get_id().replace(/\.desktop$/, '');
 }
 
 /**

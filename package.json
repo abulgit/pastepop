@@ -1,25 +1,28 @@
 {
-  "name": "ctrlv",
+  "name": "pastepop",
   "version": "1.0.0",
   "description": "Windows-style clipboard history popup for GNOME Shell",
   "private": true,
   "type": "module",
   "license": "GPL-2.0-or-later",
-  "repository": "github:abulgit/ctrlv",
+  "repository": "github:abulgit/pastepop",
   "devDependencies": {
     "@eslint/js": "^10.0.1",
     "@girs/gjs": "^5.6.0",
     "@girs/gnome-shell": "^51.0.1",
     "@types/node": "^22.20.5",
+    "emojibase": "^18.0.0",
+    "emojibase-data": "^18.0.0",
     "eslint": "^10.14.0",
     "typescript": "~6.0.3",
     "typescript-eslint": "^8.72.1"
   },
   "scripts": {
-    "build": "rm -rf dist && tsc && cp -r metadata.json stylesheet.css schemas dist/ && glib-compile-schemas dist/schemas",
+    "build": "rm -rf dist && tsc && cp -r metadata.json stylesheet.css schemas data dist/ && glib-compile-schemas dist/schemas",
     "lint": "eslint .",
     "test": "tsc -p tsconfig.test.json && node --test \"src/core/*.test.ts\"",
-    "pack": "npm run build && gnome-extensions pack dist --force --out-dir=. --extra-source=core --extra-source=shell --extra-source=ui",
-    "deploy": "npm run pack && gnome-extensions install --force ctrlv@abulgit.shell-extension.zip && gnome-extensions enable ctrlv@abulgit"
+    "pack": "npm run build && gnome-extensions pack dist --force --out-dir=. --extra-source=core --extra-source=shell --extra-source=ui --extra-source=prefs --extra-source=data",
+    "pot": "xgettext --from-code=UTF-8 --language=TypeScript --add-comments=Translators --package-name=PastePop --output=po/pastepop.pot src/*.ts src/*/*.ts",
+    "deploy": "npm run pack && gnome-extensions install --force pastepop@abulgit.shell-extension.zip && gnome-extensions enable pastepop@abulgit"
   }
 }

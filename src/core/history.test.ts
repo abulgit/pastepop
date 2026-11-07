@@ -2,20 +2,29 @@ import assert from 'node:assert/strict';
 import {createHash} from 'node:crypto';
 import {test} from 'node:test';
 
-import {History, createItem, fileNames, parseIndex, preview, type Item} from './history.ts';
+import {History, createItem, fileNames, maxAge, parseIndex, preview, type Item} from './history.ts';
 
 const sha256 = (data: Uint8Array) => createHash('sha256').update(data).digest('hex');
 const bytes = (text: string) => new TextEncoder().encode(text);
 
-function text(content: string, pinned = false): Item {
-    return {hash: sha256(bytes(content)), kind: 'text', text: content, blob: false, pinned};
+const HOUR = 60 * 60 * 1000;
+
+function text(content: string, pinned = false, time = Date.now()): Item {
+    return {hash: sha256(bytes(content)), kind: 'text', text: content, blob: false, pinned, time};
 }
 
-function history(limit = 10) {
-    const removed: Item[] = [];
-    const h = new History(limit, r => removed.push(...r));
-    return {h, removed};
+function image(hash: string, time = Date.now()): Item {
+    return {hash, kind: 'image', text: '', blob: true, pinned: false, time};
 }
+
+function history(limit = 10, age = Infinity) {
+    const deleted: string[] = [];
+    let changes = 0;
+    const h = new History(limit, age, () => changes++, hash => deleted.push(hash));
+    return {h, deleted, changes: () => changes};
+}
+
+const texts = (h: History) => h.items.map(i => i.text || i.hash);
 
 test('text is hashed fully, large images by size and edges', () => {
     const hash = (kind: 'text' | 'image', data: Uint8Array) => createItem(kind, data, sha256)?.hash;
@@ -41,6 +50,7 @@ test('createItem skips blank text and empty images, and moves long text to a blo
     assert.equal(createItem('text', bytes('x'.repeat(4096)), sha256)?.blob, false);
 
     assert.equal(createItem('image', new Uint8Array([1]), sha256)?.blob, true);
+    assert.equal(createItem('image', new Uint8Array([1]), sha256)?.size, undefined);
 });
 
 test('createItem reads copied files as a URI list', () => {
@@ -65,51 +75,140 @@ test('add puts new items on top and moves duplicates, keeping the pin', () => {
     assert.deepEqual(h.items.map(i => [i.text, i.pinned]), [['a', true], ['b', false]]);
 });
 
-test('the limit drops the oldest unpinned items and ignores pins', () => {
-    const {h, removed} = history(2);
+test('the limit drops the oldest unpinned items and their blobs, and ignores pins', () => {
+    const {h, deleted} = history(2);
     h.add(text('a', true));
-    h.add(text('b'));
+    h.add(image('b'));
     h.add(text('c'));
     h.add(text('d'));
-    assert.deepEqual(h.items.map(i => i.text), ['d', 'c', 'a']);
-    assert.deepEqual(removed.map(i => i.text), ['b']);
+    assert.deepEqual(h.items.map(i => i.hash), [text('d').hash, text('c').hash, text('a').hash]);
+    assert.deepEqual(deleted, ['b']);
 
     h.setLimit(1);
-    assert.deepEqual(h.items.map(i => i.text), ['d', 'a']);
+    assert.deepEqual(texts(h), ['d', 'a']);
 });
 
-test('clear keeps pins and reports what went', () => {
-    const {h, removed} = history();
-    h.add(text('a'));
-    h.add(text('b', true));
-    h.clear();
-    assert.deepEqual(h.items.map(i => i.text), ['b']);
-    assert.deepEqual(removed.map(i => i.text), ['a']);
+test('unpinned items expire by age when pruned', () => {
+    const now = Date.now();
+    const {h, changes} = history(10, maxAge('day'));
+    h.load([text('new', false, now - 1.5 * HOUR), text('old', false, now - 2 * HOUR), text('pin', true, now - 9 * HOUR)]);
+    assert.deepEqual(texts(h), ['new', 'old', 'pin']);
+
+    const before = changes();
+    h.prune(now + 21 * HOUR);
+    assert.equal(changes(), before, 'nothing expired, nothing to save');
+    h.prune(now + 22.25 * HOUR);
+    assert.deepEqual(texts(h), ['new', 'pin']);
+
+    h.setMaxAge(maxAge('hour'));
+    assert.deepEqual(texts(h), ['pin']);
+    h.add(text('fresh', false, now - 2 * HOUR));
+    assert.deepEqual(texts(h), ['pin'], 'added items are pruned too');
 });
 
-test('restore appends saved items behind new ones', () => {
+test('maxAge maps keep-unpinned values', () => {
+    assert.equal(maxAge('hour'), HOUR);
+    assert.equal(maxAge('week'), 7 * 24 * HOUR);
+    assert.equal(maxAge('forever'), Infinity);
+    assert.equal(maxAge('restart'), Infinity);
+});
+
+test('load appends saved items behind new ones', () => {
     const {h} = history();
     h.add(text('new'));
-    h.restore([text('old'), text('new')]);
-    assert.deepEqual(h.items.map(i => i.text), ['new', 'old']);
+    h.load([text('old'), text('new')]);
+    assert.deepEqual(texts(h), ['new', 'old']);
 });
 
-test('remove and togglePin', () => {
-    const {h, removed} = history();
+test('clear keeps pins, returns what went and keeps its blobs', () => {
+    const {h, deleted} = history();
+    h.add(image('a'));
+    h.add(text('b', true));
+    assert.deepEqual(h.clear().map(i => i.hash), ['a']);
+    assert.deepEqual(texts(h), ['b']);
+    assert.deepEqual(deleted, []);
+});
+
+test('restore puts pins back in place and other items by time', () => {
+    const now = Date.now();
+    const {h} = history();
+    h.load(['a', 'b', 'c', 'd', 'e'].map((t, i) => text(t, t === 'b', now - i)));
+    const [, b, c] = h.items;
+    h.remove(c);
+    h.remove(b);
+    const cleared = h.clear();
+    assert.deepEqual(texts(h), []);
+    h.restore([b, c, ...cleared]);
+    assert.deepEqual(texts(h), ['a', 'b', 'c', 'd', 'e']);
+    assert.equal(b.pinned, true);
+
+    const [a] = h.items;
+    h.remove(a);
     h.add(text('a'));
-    h.add(text('b'));
+    h.restore([a]);
+    assert.deepEqual(texts(h), ['a', 'b', 'c', 'd', 'e'], 'copied again meanwhile');
+});
+
+test('restore fits items between copies made since, and trims to the limit', () => {
+    const now = Date.now();
+    const {h, deleted} = history(4);
+    h.load([text('a', false, now - 1), text('b', false, now - 2), text('c', false, now - 3), image('d', now - 4)]);
+    const [, b, , d] = h.items;
+    h.remove(d);
+    h.add(text('x'));
+    h.remove(b);
+    h.add(text('y'));
+    h.restore([d, b]);
+    assert.deepEqual(texts(h), ['y', 'x', 'a', 'b']);
+    assert.deepEqual(deleted, ['d']);
+});
+
+test('undoing clear all after a copy leaves pins where they are', () => {
+    const now = Date.now();
+    const {h} = history();
+    h.load([text('pin', true, now - 1), text('a', false, now - 2), text('b', false, now - 3)]);
+    const cleared = h.clear();
+    h.add(text('new'));
+    h.restore(cleared);
+    assert.deepEqual(texts(h), ['new', 'pin', 'a', 'b']);
+});
+
+test('unpinning counts as copying again', () => {
+    const now = Date.now();
+    const {h} = history(1, maxAge('hour'));
+    h.load([text('new', false, now), text('old pin', true, now - 2 * HOUR)]);
+    h.togglePin(h.items[1]);
+    h.prune();
+    assert.deepEqual(texts(h), ['old pin']);
+});
+
+test('purge deletes the blobs that nothing else needs', () => {
+    const {h, deleted} = history();
+    const x = image('x');
+    const y = image('y');
+    h.add(x);
+    h.add(y);
+    h.remove(x);
+    h.remove(y);
+    assert.equal(h.needsBlob('x'), true);
+    h.add(image('y'));
+    h.purge([x, y]);
+    assert.deepEqual(deleted, ['x'], 'y was copied again');
+    assert.equal(h.needsBlob('x'), false);
+});
+
+test('togglePin', () => {
+    const {h} = history();
+    h.add(text('a'));
     h.togglePin(h.items[0]);
     assert.equal(h.items[0].pinned, true);
-    h.remove(h.items[1]);
-    assert.deepEqual(h.items.map(i => i.text), ['b']);
-    assert.deepEqual(removed.map(i => i.text), ['a']);
 });
 
 test('search is case-insensitive and matches file names', () => {
     const {h} = history();
     h.add(text('Hello World'));
-    h.add({hash: 'f', kind: 'files', text: 'file:///tmp/My%20Report.pdf', blob: false, pinned: false});
-    h.add({hash: 'i', kind: 'image', text: '', blob: true, pinned: false});
+    h.add({hash: 'f', kind: 'files', text: 'file:///tmp/My%20Report.pdf', blob: false, pinned: false, time: 0});
+    h.add(image('i'));
     assert.equal(h.search('').length, 3);
     assert.deepEqual(h.search('hello').map(i => i.text), ['Hello World']);
     assert.deepEqual(h.search('my report').map(i => i.hash), ['f']);
@@ -117,8 +216,10 @@ test('search is case-insensitive and matches file names', () => {
 
 test('parseIndex drops malformed entries and unsafe hashes', () => {
     const good = text('ok');
-    const json = JSON.stringify({boot: 'b', items: [good, {...good, hash: '../x'}, {hash: 'y'}, null]});
-    assert.deepEqual(parseIndex(json), {boot: 'b', items: [good]});
+    const sized = {...image('i'), size: [3, 4]};
+    const json = JSON.stringify({boot: 'b', items: [good, sized, {...good, hash: '../x'}, {...sized, size: [3]},
+        {...good, time: undefined}, {hash: 'y'}, null]});
+    assert.deepEqual(parseIndex(json), {boot: 'b', items: [good, sized]});
     assert.deepEqual(parseIndex('{}'), {boot: '', items: []});
     assert.throws(() => parseIndex('{'));
 });

@@ -1,67 +1,101 @@
 import Adw from 'gi://Adw';
 import Gio from 'gi://Gio';
+import GLib from 'gi://GLib';
 import Gtk from 'gi://Gtk';
-import {ExtensionPreferences} from 'resource:///org/gnome/Shell/Extensions/js/extensions/prefs.js';
+import {ExtensionPreferences, gettext as _} from 'resource:///org/gnome/Shell/Extensions/js/extensions/prefs.js';
 
-function listRow(settings: Gio.Settings, key: string, title: string): Adw.EntryRow {
-    const row = new Adw.EntryRow({title, text: settings.get_strv(key).join(', '), show_apply_button: true});
-    row.connect('apply', () => settings.set_strv(key, row.text.split(',').map(s => s.trim()).filter(Boolean)));
-    return row;
+import {appsRow} from './prefs/apps.ts';
+import {comboRow, shortcutRow, switchRow} from './prefs/rows.ts';
+
+function group(rows: Gtk.Widget[], title = '', description = ''): Adw.PreferencesGroup {
+    const group = new Adw.PreferencesGroup({title, description});
+    rows.forEach(row => group.add(row));
+    return group;
 }
 
-function switchRow(settings: Gio.Settings, key: string, title: string, subtitle: string): Adw.SwitchRow {
-    const row = new Adw.SwitchRow({title, subtitle});
-    settings.bind(key, row, 'active', Gio.SettingsBindFlags.DEFAULT);
-    return row;
+function page(title: string, iconName: string, groups: Adw.PreferencesGroup[]): Adw.PreferencesPage {
+    const page = new Adw.PreferencesPage({title, icon_name: iconName});
+    groups.forEach(g => page.add(g));
+    return page;
 }
 
-export default class CtrlVPreferences extends ExtensionPreferences {
+export default class PastePopPreferences extends ExtensionPreferences {
     override fillPreferencesWindow(window: Adw.PreferencesWindow): Promise<void> {
         const settings = this.getSettings();
+        window.search_enabled = true;
+        window.add(this._general(window, settings));
+        window.add(this._privacy(window, settings));
+        return Promise.resolve();
+    }
 
-        const shortcut = new Adw.EntryRow({
-            title: 'Shortcut',
-            text: settings.get_strv('ctrlv-shortcut').at(0) ?? '',
-            show_apply_button: true,
-        });
-        shortcut.connect('apply', () => {
-            const [valid, key] = Gtk.accelerator_parse(shortcut.text);
-            if (valid && key !== 0) {
-                shortcut.remove_css_class('error');
-                settings.set_strv('ctrlv-shortcut', [shortcut.text]);
-            } else {
-                shortcut.add_css_class('error');
-            }
-        });
-
-        const keyboard = new Adw.PreferencesGroup({title: 'Keyboard'});
-        keyboard.add(shortcut);
-        keyboard.add(switchRow(settings, 'takeover-shortcut', 'Take over Super+V',
-            'GNOME uses it for the notification list, which stays on Super+M'));
-
+    private _general(window: Adw.PreferencesWindow, settings: Gio.Settings): Adw.PreferencesPage {
         const size = Adw.SpinRow.new_with_range(1, 100, 1);
-        size.title = 'Items to keep';
-        size.subtitle = 'Pinned items don\'t count';
+        size.title = _('Items to keep');
+        size.subtitle = _('Pinned items don’t count');
         settings.bind('history-size', size, 'value', Gio.SettingsBindFlags.DEFAULT);
 
-        const history = new Adw.PreferencesGroup({title: 'History'});
-        history.add(size);
-        history.add(switchRow(settings, 'persist-history', 'Keep history after restart',
-            'When off, only pinned items survive a restart'));
-        history.add(switchRow(settings, 'private-mode', 'Private mode', 'Stop recording what you copy'));
-
-        const apps = new Adw.PreferencesGroup({
-            title: 'Apps',
-            description: 'Comma-separated app IDs, such as org.gnome.Ptyxis',
+        const about = new Adw.ActionRow({title: _('About PastePop'), activatable: true});
+        about.connect('activated', () => {
+            const url = this.metadata.url as string;
+            new Adw.AboutDialog({
+                application_name: 'PastePop',
+                application_icon: 'edit-paste-symbolic',
+                developer_name: 'Abul',
+                version: this.metadata['version-name'] as string,
+                website: url,
+                issue_url: `${url}/issues`,
+                license_type: Gtk.License.GPL_2_0,
+            }).present(window);
         });
-        apps.add(listRow(settings, 'excluded-apps', 'Never record copies from'));
-        apps.add(listRow(settings, 'terminal-apps', 'Paste with Ctrl+Shift+V in'));
 
-        const page = new Adw.PreferencesPage();
-        page.add(keyboard);
-        page.add(history);
-        page.add(apps);
-        window.add(page);
-        return Promise.resolve();
+        return page(_('General'), 'preferences-system-symbolic', [
+            group([shortcutRow(window, settings)], _('Shortcut')),
+            group([
+                size,
+                comboRow(settings, 'keep-unpinned', _('Keep unpinned items'), [
+                    ['forever', _('Forever')],
+                    ['restart', _('Until restart')],
+                    ['hour', _('For an hour')],
+                    ['day', _('For a day')],
+                    ['week', _('For a week')],
+                ]),
+            ], _('History')),
+            group([
+                comboRow(settings, 'open-at', _('Open at'), [
+                    ['caret', _('Text cursor')],
+                    ['pointer', _('Mouse pointer')],
+                    ['center', _('Center of the screen')],
+                ]),
+                switchRow(settings, 'show-symbols', _('Emoji & symbols tabs')),
+                switchRow(settings, 'paste-on-select', _('Paste automatically'),
+                    _('When off, choosing an item only copies it')),
+            ], _('Popup')),
+            group([
+                appsRow(window, settings, 'terminal-apps', _('Terminal apps'),
+                    _('These apps paste with Ctrl+Shift+V')),
+            ], _('Advanced')),
+            group([about]),
+        ]);
+    }
+
+    private _privacy(window: Adw.PreferencesWindow, settings: Gio.Settings): Adw.PreferencesPage {
+        const dir = GLib.build_filenamev([GLib.get_user_data_dir(), 'pastepop']);
+        const open = new Gtk.Button({label: _('Open Folder'), valign: Gtk.Align.CENTER});
+        open.connect('clicked', () => new Gtk.FileLauncher({file: Gio.File.new_for_path(dir)}).launch(window, null, null));
+        const storage = new Adw.ActionRow({
+            title: _('Storage'),
+            subtitle: dir.replace(GLib.get_home_dir(), '~'),
+            subtitle_selectable: true,
+        });
+        storage.add_suffix(open);
+
+        return page(_('Privacy'), 'preferences-system-privacy-symbolic', [
+            group([
+                switchRow(settings, 'private-mode', _('Private mode'), _('Stop recording what you copy')),
+                appsRow(window, settings, 'excluded-apps', _('Excluded apps'),
+                    _('What you copy in these apps is never recorded')),
+            ]),
+            group([storage], _('Data'), _('Your clipboard history is kept only on this computer')),
+        ]);
     }
 }

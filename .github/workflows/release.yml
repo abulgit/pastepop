@@ -1,0 +1,23 @@
+name: Release
+
+on:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-26.04
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: lts/*
+      - run: sudo apt-get update && sudo apt-get install -y --no-install-recommends gnome-shell
+      - run: npm ci
+      - run: npm run pack
+      - run: gh release create "$GITHUB_REF_NAME" *.shell-extension.zip --generate-notes
+        env:
+          GH_TOKEN: ${{ github.token }}

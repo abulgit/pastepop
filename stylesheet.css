@@ -1,71 +1,164 @@
-.ctrlv-popup {
+.pastepop-popup {
   width: 360px;
   max-height: 460px;
-  padding: 12px;
-  spacing: 10px;
+  padding: 8px;
+  spacing: 8px;
 }
 
-.ctrlv-header {
-  spacing: 6px;
+.pastepop-header,
+.pastepop-tabs {
+  spacing: 2px;
 }
 
-.ctrlv-title {
+.pastepop-header .icon-button {
+  padding: 8px;
+}
+
+/* Text tabs take no more height than the icons. */
+.pastepop-tabs StLabel {
+  font-size: 0.85em;
+}
+
+.pastepop-title {
   font-weight: bold;
+  padding-left: 8px;
 }
 
-.ctrlv-header .button {
-  padding: 3px 12px;
+.pastepop-header .pastepop-toggle:checked {
+  color: -st-accent-fg-color;
+  background-color: -st-accent-color;
 }
 
-.ctrlv-search StIcon,
-.ctrlv-files StIcon {
+.pastepop-header .pastepop-toggle:checked:hover {
+  background-color: st-lighten(-st-accent-color, 4%);
+}
+
+.pastepop-search StIcon,
+.pastepop-file-icon,
+.pastepop-picker-strip StIcon {
   icon-size: 16px;
 }
 
-.ctrlv-list {
+/* The theme's buttons and OSDs are bold. */
+.pastepop-item,
+.pastepop-toast,
+.pastepop-picker-strip .button,
+.pastepop-emoji,
+.pastepop-glyph,
+.pastepop-kaomoji {
+  font-weight: normal;
+}
+
+.pastepop-list {
   spacing: 6px;
 }
 
-.ctrlv-popup StScrollBar {
+.pastepop-popup StScrollBar {
   padding-left: 6px;
 }
 
 /* Scrolled lists lay rows out at their minimum height, which the theme's .button would cap at one line. */
-.ctrlv-item {
+.pastepop-item {
   min-height: auto;
-  font-weight: normal;
   text-align: left;
-  padding: 10px 6px 10px 14px;
+  padding: 12px;
   border-radius: 12px;
 }
 
-.ctrlv-item:selected {
+.pastepop-item:selected,
+.pastepop-emoji:selected,
+.pastepop-glyph:selected,
+.pastepop-kaomoji:selected {
   box-shadow: inset 0 0 0 2px -st-accent-color;
 }
 
-.ctrlv-actions {
+.pastepop-actions {
   spacing: 2px;
   margin-left: 6px;
 }
 
-.ctrlv-action {
-  padding: 6px;
+.pastepop-action {
+  padding: 4px;
   background-color: transparent;
 }
 
-.ctrlv-action:checked {
+.pastepop-action:checked {
   color: -st-accent-color;
+  background-color: transparent;
 }
 
-.ctrlv-files {
+.pastepop-content {
   spacing: 10px;
 }
 
-.ctrlv-empty {
-  padding: 48px 0;
+.pastepop-swatch {
+  width: 16px;
+  height: 16px;
+  border-radius: 4px;
+  border-width: 1px;
+}
+
+.pastepop-empty {
+  padding: 36px 0;
   spacing: 12px;
 }
 
-.ctrlv-empty StIcon {
+.pastepop-empty StIcon {
   icon-size: 48px;
+}
+
+.pastepop-empty .button {
+  margin-top: 6px;
+}
+
+.pastepop-toast {
+  margin: 0 0 8px;
+  padding: 6px 6px 6px 18px;
+}
+
+.pastepop-accel {
+  padding-left: 24px;
+}
+
+/* symbols */
+.pastepop-picker {
+  spacing: 6px;
+}
+
+.pastepop-picker-strip {
+  spacing: 2px;
+}
+
+.pastepop-picker-strip .button {
+  padding: 6px 0;
+  border-radius: 8px;
+}
+
+.pastepop-picker-heading {
+  padding: 8px 4px 4px;
+  font-size: 0.9em;
+  font-weight: bold;
+}
+
+.pastepop-emoji,
+.pastepop-glyph {
+  width: 40px;
+  height: 40px;
+  min-height: 40px;
+  padding: 0;
+  border-radius: 8px;
+}
+
+.pastepop-emoji {
+  font-size: 22px;
+}
+
+.pastepop-glyph {
+  font-size: 18px;
+}
+
+.pastepop-kaomoji {
+  margin: 3px;
+  padding: 6px 12px;
+  border-radius: 999px;
 }

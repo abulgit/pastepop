@@ -1,3 +1,5 @@
+import {pngSize} from './mime.ts';
+
 export type Kind = 'text' | 'image' | 'files';
 
 export interface Item {
@@ -8,6 +10,9 @@ export interface Item {
     /** The full content lives in blobs/<hash>: always for images, and for text over INLINE_LIMIT bytes. */
     blob: boolean;
     pinned: boolean;
+    /** When it was last copied, in milliseconds since the epoch. */
+    time: number;
+    size?: [number, number];
 }
 
 interface Index {
@@ -25,6 +30,14 @@ const PREVIEW_LINES = 3;
 const LINE_COLUMNS = 32;
 const WIDE = /[\u1100-\u115F\u2E80-\uA4CF\uAC00-\uD7A3\uF900-\uFAFF\uFE30-\uFE4F\uFF00-\uFF60\uFFE0-\uFFE6\u{1F300}-\u{1FAFF}\u{20000}-\u{3FFFD}]/u;
 const KINDS: unknown[] = ['text', 'image', 'files'];
+const HOUR = 60 * 60 * 1000;
+// `restart` has no age limit; unpinned items are dropped when the index of an earlier boot loads.
+const MAX_AGE: Partial<Record<string, number>> = {hour: HOUR, day: 24 * HOUR, week: 7 * 24 * HOUR};
+
+/** How long unpinned items are kept, in milliseconds, for a `keep-unpinned` value. */
+export function maxAge(keep: string): number {
+    return MAX_AGE[keep] ?? Infinity;
+}
 
 /** Images are hashed by size and edges, because hashing up to 20 MB would stall the compositor. */
 function fingerprint(kind: Kind, data: Uint8Array, sha256: Sha256): string {
@@ -38,14 +51,15 @@ export function createItem(kind: Kind, data: Uint8Array, sha256: Sha256): Item |
     if (data.length === 0)
         return null;
     const hash = fingerprint(kind, data, sha256);
+    const time = Date.now();
     if (kind === 'image')
-        return {hash, kind, text: '', blob: true, pinned: false};
+        return {hash, kind, text: '', blob: true, pinned: false, time, size: pngSize(data)};
 
     const blob = kind === 'text' && data.length > INLINE_LIMIT;
     let text = new TextDecoder().decode(blob ? data.subarray(0, INLINE_LIMIT) : data);
     if (kind === 'files')
         text = text.split(/[\r\n\0]+/).slice(1).filter(Boolean).join('\n');
-    return text.trim() ? {hash, kind, text, blob, pinned: false} : null;
+    return text.trim() ? {hash, kind, text, blob, pinned: false, time} : null;
 }
 
 function decode(text: string): string {
@@ -91,25 +105,40 @@ export function parseIndex(json: string): Index {
             // The hash becomes a file name, so it must not be able to escape the blob directory.
             return typeof i?.hash === 'string' && /^[\w-]+$/.test(i.hash) &&
                 KINDS.includes(i.kind) && typeof i.text === 'string' &&
-                typeof i.blob === 'boolean' && typeof i.pinned === 'boolean';
+                typeof i.blob === 'boolean' && typeof i.pinned === 'boolean' && typeof i.time === 'number' &&
+                (i.size === undefined || Array.isArray(i.size) && i.size.length === 2 && i.size.every(Number.isInteger));
         }),
     };
 }
 
-/** Newest first. Pins don't move; they don't count toward the limit and survive clearing. */
+/**
+ * Newest first. Pins don't count toward the limit, don't expire and survive clearing.
+ * Removed items keep their blobs until purge(), so that restore() can undo the removal.
+ */
 export class History {
     items: Item[] = [];
     private _limit: number;
-    private readonly _changed: (removed: Item[]) => void;
+    private _maxAge: number;
+    // Removed items that can still be restored, with the index each had.
+    private readonly _removed = new Map<Item, number>();
+    private readonly _changed: () => void;
+    private readonly _deleteBlob: (hash: string) => void;
 
-    /** `changed` runs after every mutation with the items that left the history. */
-    constructor(limit: number, changed: (removed: Item[]) => void) {
+    /** `changed` runs after every change to the list, `deleteBlob` once nothing needs a blob any more. */
+    constructor(limit: number, maxAge: number, changed: () => void, deleteBlob: (hash: string) => void) {
         this._limit = limit;
+        this._maxAge = maxAge;
         this._changed = changed;
+        this._deleteBlob = deleteBlob;
     }
 
     has(hash: string): boolean {
         return this.items.some(i => i.hash === hash);
+    }
+
+    /** Whether the history or an item that can still be restored refers to a blob. */
+    needsBlob(hash: string): boolean {
+        return this.has(hash) || [...this._removed.keys()].some(i => i.hash === hash);
     }
 
     /** Copying something again moves it to the top and keeps its pin. */
@@ -118,34 +147,86 @@ export class History {
         if (index >= 0)
             item.pinned = this.items.splice(index, 1)[0].pinned;
         this.items.unshift(item);
-        this._changed(this._trim());
+        this._trim(Date.now());
+        this._changed();
     }
 
     /** Appends saved items behind anything copied while they were loading. */
-    restore(items: Item[]): void {
+    load(items: Item[]): void {
         this.items.push(...items.filter(i => !this.has(i.hash)));
-        this._changed(this._trim());
+        this._trim(Date.now());
+        this._changed();
     }
 
     remove(item: Item): void {
-        this.items = this.items.filter(i => i !== item);
-        this._changed([item]);
+        const index = this.items.indexOf(item);
+        if (index < 0)
+            return;
+        this.items.splice(index, 1);
+        this._removed.set(item, index);
+        this._changed();
+    }
+
+    clear(): Item[] {
+        const removed = this.items.filter(i => !i.pinned);
+        removed.forEach(i => this._removed.set(i, this.items.indexOf(i)));
+        this.items = this.items.filter(i => i.pinned);
+        this._changed();
+        return removed;
+    }
+
+    /**
+     * Puts removed items back: pins where they were, other items by when they were copied, as
+     * more may have been copied since. Restored items count toward the limit again.
+     */
+    restore(items: Item[]): void {
+        for (const [item, index] of [...this._removed].reverse()) {
+            if (!items.includes(item))
+                continue;
+            this._removed.delete(item);
+            // Copying it again has already brought it back.
+            if (this.has(item.hash))
+                continue;
+            const at = item.pinned ? index : this.items.findIndex(i => !i.pinned && i.time < item.time);
+            this.items.splice(at < 0 ? this.items.length : at, 0, item);
+        }
+        this._trim(Date.now());
+        this._changed();
+    }
+
+    /** Makes removals final, deleting the blobs nothing else refers to. */
+    purge(items: Item[]): void {
+        items.forEach(i => this._removed.delete(i));
+        for (const hash of new Set(items.filter(i => i.blob).map(i => i.hash))) {
+            if (!this.needsBlob(hash))
+                this._deleteBlob(hash);
+        }
     }
 
     togglePin(item: Item): void {
         item.pinned = !item.pinned;
-        this._changed([]);
-    }
-
-    clear(): void {
-        const removed = this.items.filter(i => !i.pinned);
-        this.items = this.items.filter(i => i.pinned);
-        this._changed(removed);
+        // As if copied just now, or it could be the first to go once it counts toward the limit again.
+        if (!item.pinned) {
+            item.time = Date.now();
+            this.items = [item, ...this.items.filter(i => i !== item)];
+        }
+        this._changed();
     }
 
     setLimit(limit: number): void {
         this._limit = limit;
-        this._changed(this._trim());
+        this.prune();
+    }
+
+    setMaxAge(maxAge: number): void {
+        this._maxAge = maxAge;
+        this.prune();
+    }
+
+    /** Drops unpinned items beyond the limit or older than the maximum age. */
+    prune(now = Date.now()): void {
+        if (this._trim(now))
+            this._changed();
     }
 
     search(query: string): Item[] {
@@ -158,9 +239,13 @@ export class History {
         });
     }
 
-    private _trim(): Item[] {
-        const removed = this.items.filter(i => !i.pinned).slice(this._limit);
-        this.items = this.items.filter(i => !removed.includes(i));
-        return removed;
+    private _trim(now: number): boolean {
+        const dropped = this.items.filter(i => !i.pinned)
+            .filter((item, index) => index >= this._limit || now - item.time > this._maxAge);
+        if (dropped.length === 0)
+            return false;
+        this.items = this.items.filter(i => !dropped.includes(i));
+        this.purge(dropped);
+        return true;
     }
 }

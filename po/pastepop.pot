@@ -1,0 +1,412 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PastePop package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PastePop\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-11-07 11:07+0530\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=INTEGER; plural=EXPRESSION;\n"
+
+#: src/extension.ts:76
+msgid "PastePop is ready"
+msgstr ""
+
+#: src/extension.ts:77
+msgid "Pick a shortcut to open it. Super+V works like on Windows."
+msgstr ""
+
+#: src/extension.ts:79 src/prefs/rows.ts:79
+msgid "Use Super+V"
+msgstr ""
+
+#: src/extension.ts:80
+msgid "Choose…"
+msgstr ""
+
+#: src/prefs.ts:33
+msgid "Items to keep"
+msgstr ""
+
+#: src/prefs.ts:34
+msgid "Pinned items don’t count"
+msgstr ""
+
+#: src/prefs.ts:37
+msgid "About PastePop"
+msgstr ""
+
+#: src/prefs.ts:51
+msgid "General"
+msgstr ""
+
+#: src/prefs.ts:52
+msgid "Shortcut"
+msgstr ""
+
+#: src/prefs.ts:55
+msgid "Keep unpinned items"
+msgstr ""
+
+#: src/prefs.ts:56
+msgid "Forever"
+msgstr ""
+
+#: src/prefs.ts:57
+msgid "Until restart"
+msgstr ""
+
+#: src/prefs.ts:58
+msgid "For an hour"
+msgstr ""
+
+#: src/prefs.ts:59
+msgid "For a day"
+msgstr ""
+
+#: src/prefs.ts:60
+msgid "For a week"
+msgstr ""
+
+#: src/prefs.ts:62
+msgid "History"
+msgstr ""
+
+#: src/prefs.ts:64
+msgid "Open at"
+msgstr ""
+
+#: src/prefs.ts:65
+msgid "Text cursor"
+msgstr ""
+
+#: src/prefs.ts:66
+msgid "Mouse pointer"
+msgstr ""
+
+#: src/prefs.ts:67
+msgid "Center of the screen"
+msgstr ""
+
+#: src/prefs.ts:69
+msgid "Emoji & symbols tabs"
+msgstr ""
+
+#: src/prefs.ts:70
+msgid "Paste automatically"
+msgstr ""
+
+#: src/prefs.ts:71
+msgid "When off, choosing an item only copies it"
+msgstr ""
+
+#: src/prefs.ts:72
+msgid "Popup"
+msgstr ""
+
+#: src/prefs.ts:74
+msgid "Terminal apps"
+msgstr ""
+
+#: src/prefs.ts:75
+msgid "These apps paste with Ctrl+Shift+V"
+msgstr ""
+
+#: src/prefs.ts:76
+msgid "Advanced"
+msgstr ""
+
+#: src/prefs.ts:83
+msgid "Open Folder"
+msgstr ""
+
+#: src/prefs.ts:86
+msgid "Storage"
+msgstr ""
+
+#: src/prefs.ts:92
+msgid "Privacy"
+msgstr ""
+
+#: src/prefs.ts:94 src/ui/popup.ts:105
+msgid "Private mode"
+msgstr ""
+
+#: src/prefs.ts:94
+msgid "Stop recording what you copy"
+msgstr ""
+
+#: src/prefs.ts:95
+msgid "Excluded apps"
+msgstr ""
+
+#: src/prefs.ts:96
+msgid "What you copy in these apps is never recorded"
+msgstr ""
+
+#: src/prefs.ts:98
+msgid "Data"
+msgstr ""
+
+#: src/prefs.ts:98
+msgid "Your clipboard history is kept only on this computer"
+msgstr ""
+
+#: src/prefs/apps.ts:37
+msgid "Add App…"
+msgstr ""
+
+#: src/prefs/apps.ts:51
+msgid "Remove"
+msgstr ""
+
+#: src/prefs/apps.ts:69
+msgid "Search apps"
+msgstr ""
+
+#: src/prefs/apps.ts:70
+msgid "Add App"
+msgstr ""
+
+#: src/prefs/apps.ts:72
+msgid "No apps found"
+msgstr ""
+
+#: src/prefs/rows.ts:55
+msgid "Disabled"
+msgstr ""
+
+#: src/prefs/rows.ts:56
+msgid "Open clipboard"
+msgstr ""
+
+#. Translators: %s is a GNOME shortcut's description, such as “Switch applications”.
+#: src/prefs/rows.ts:63
+#, javascript-format
+msgid "Also used by GNOME: %s"
+msgstr ""
+
+#: src/prefs/rows.ts:72
+msgid "Set Shortcut"
+msgstr ""
+
+#: src/prefs/rows.ts:73
+msgid "Press a key combination with Ctrl, Alt or Super, or Esc to cancel."
+msgstr ""
+
+#: src/prefs/rows.ts:77
+msgid "Cancel"
+msgstr ""
+
+#: src/prefs/rows.ts:78
+msgid "Disable"
+msgstr ""
+
+#: src/ui/list.ts:66
+msgid "Turn off"
+msgstr ""
+
+#: src/ui/list.ts:131 src/ui/symbols.ts:131
+msgid "No matches"
+msgstr ""
+
+#: src/ui/list.ts:132
+msgid "Private mode is on"
+msgstr ""
+
+#: src/ui/list.ts:132
+msgid "Nothing copied yet"
+msgstr ""
+
+#: src/ui/list.ts:251
+msgid "Paste"
+msgstr ""
+
+#: src/ui/list.ts:251
+msgid "Enter"
+msgstr ""
+
+#: src/ui/list.ts:253
+msgid "Paste as plain text"
+msgstr ""
+
+#: src/ui/list.ts:253
+msgid "Shift+Enter"
+msgstr ""
+
+#: src/ui/list.ts:254
+msgid "Copy only"
+msgstr ""
+
+#: src/ui/list.ts:254
+msgid "Ctrl+Enter"
+msgstr ""
+
+#: src/ui/list.ts:256 src/ui/row.ts:206
+msgid "Unpin"
+msgstr ""
+
+#: src/ui/list.ts:256 src/ui/row.ts:206
+msgid "Pin"
+msgstr ""
+
+#: src/ui/list.ts:256
+msgid "Ctrl+P"
+msgstr ""
+
+#: src/ui/list.ts:258
+msgid "Open link"
+msgstr ""
+
+#: src/ui/list.ts:263
+msgid "Delete"
+msgstr ""
+
+#: src/ui/list.ts:263
+msgid "Del"
+msgstr ""
+
+#: src/ui/popup.ts:87 src/ui/popup.ts:99
+msgid "Clipboard"
+msgstr ""
+
+#: src/ui/popup.ts:88
+msgid "Emoji"
+msgstr ""
+
+#: src/ui/popup.ts:89 src/ui/symbols.ts:54
+msgid "Symbols"
+msgstr ""
+
+#: src/ui/popup.ts:90
+msgid "Kaomoji"
+msgstr ""
+
+#: src/ui/popup.ts:104 src/ui/popup.ts:133
+msgid "Search"
+msgstr ""
+
+#: src/ui/popup.ts:107
+msgid "Clear all"
+msgstr ""
+
+#: src/ui/popup.ts:108
+msgid "Settings"
+msgstr ""
+
+#: src/ui/row.ts:129
+msgid "More options"
+msgstr ""
+
+#: src/ui/symbols.ts:47
+msgid "Smileys & Emotion"
+msgstr ""
+
+#: src/ui/symbols.ts:48
+msgid "People & Body"
+msgstr ""
+
+#: src/ui/symbols.ts:49
+msgid "Animals & Nature"
+msgstr ""
+
+#: src/ui/symbols.ts:50
+msgid "Food & Drink"
+msgstr ""
+
+#: src/ui/symbols.ts:51
+msgid "Travel & Places"
+msgstr ""
+
+#: src/ui/symbols.ts:52
+msgid "Activities"
+msgstr ""
+
+#: src/ui/symbols.ts:53
+msgid "Objects"
+msgstr ""
+
+#: src/ui/symbols.ts:55
+msgid "Flags"
+msgstr ""
+
+#: src/ui/symbols.ts:59
+msgid "Arrows"
+msgstr ""
+
+#: src/ui/symbols.ts:60
+msgid "Math"
+msgstr ""
+
+#: src/ui/symbols.ts:61
+msgid "Currency"
+msgstr ""
+
+#: src/ui/symbols.ts:62
+msgid "Punctuation"
+msgstr ""
+
+#: src/ui/symbols.ts:63
+msgid "Greek"
+msgstr ""
+
+#: src/ui/symbols.ts:64
+msgid "Accented Letters"
+msgstr ""
+
+#: src/ui/symbols.ts:65
+msgid "Shapes"
+msgstr ""
+
+#: src/ui/symbols.ts:69
+msgid "Happy"
+msgstr ""
+
+#: src/ui/symbols.ts:70
+msgid "Sad"
+msgstr ""
+
+#: src/ui/symbols.ts:71
+msgid "Love"
+msgstr ""
+
+#: src/ui/symbols.ts:72
+msgid "Angry"
+msgstr ""
+
+#: src/ui/symbols.ts:73
+msgid "Surprised"
+msgstr ""
+
+#: src/ui/symbols.ts:74
+msgid "Other"
+msgstr ""
+
+#: src/ui/symbols.ts:209
+msgid "Recent"
+msgstr ""
+
+#: src/ui/toast.ts:21
+msgid "Undo"
+msgstr ""
+
+#: src/ui/toast.ts:42
+msgid "Deleted"
+msgstr ""
+
+#: src/ui/toast.ts:42
+#, javascript-format
+msgid "%d deleted"
+msgid_plural "%d deleted"
+msgstr[0] ""
+msgstr[1] ""

@@ -10,6 +10,8 @@ import {logError} from './storage.ts';
 const TEXT_LIMIT = 4 * 1024 * 1024;
 const IMAGE_LIMIT = 20 * 1024 * 1024;
 
+Gio._promisify(Meta.Selection.prototype, 'transfer_async');
+
 function sha256(data: Uint8Array): string {
     // Only null for an unknown checksum type.
     return GLib.compute_checksum_for_data(GLib.ChecksumType.SHA256, data)!;
@@ -25,7 +27,6 @@ export class Monitor {
 
     constructor(settings: Gio.Settings, isOwn: (source: Meta.SelectionSource) => boolean,
         onCopy: (item: Item, data: Uint8Array) => void) {
-        Gio._promisify(Meta.Selection.prototype, 'transfer_async');
         this._ownerChangedId = this._selection.connect('owner-changed',
             (_selection, type: Meta.SelectionType, source: Meta.SelectionSource | null) => {
                 if (type !== Meta.SelectionType.SELECTION_CLIPBOARD)

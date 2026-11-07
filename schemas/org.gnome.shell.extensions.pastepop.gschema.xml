@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schemalist>
+  <schema id="org.gnome.shell.extensions.pastepop" path="/org/gnome/shell/extensions/pastepop/">
+    <key name="pastepop-shortcut" type="as">
+      <default>[]</default>
+      <summary>Shortcut that opens and closes the clipboard history</summary>
+      <description>When it is one of GNOME’s shortcuts for the notification list, such as Super+V, the notification list keeps only its other shortcuts while the extension is on. Nothing is written to GNOME’s settings.</description>
+    </key>
+    <key name="history-size" type="i">
+      <range min="1" max="100"/>
+      <default>10</default>
+      <summary>Number of items to keep, not counting pins</summary>
+    </key>
+    <key name="keep-unpinned" type="s">
+      <choices>
+        <choice value="forever"/>
+        <choice value="restart"/>
+        <choice value="hour"/>
+        <choice value="day"/>
+        <choice value="week"/>
+      </choices>
+      <default>'forever'</default>
+      <summary>How long unpinned items are kept</summary>
+      <description>“restart” keeps them until the computer restarts, as on Windows.</description>
+    </key>
+    <key name="paste-on-select" type="b">
+      <default>true</default>
+      <summary>Paste the chosen item</summary>
+      <description>When off, choosing an item only copies it.</description>
+    </key>
+    <key name="open-at" type="s">
+      <choices>
+        <choice value="caret"/>
+        <choice value="pointer"/>
+        <choice value="center"/>
+      </choices>
+      <default>'caret'</default>
+      <summary>Where the popup opens</summary>
+    </key>
+    <key name="show-symbols" type="b">
+      <default>true</default>
+      <summary>Show the emoji, symbol and kaomoji tabs</summary>
+    </key>
+    <key name="recent-symbols" type="as">
+      <default>[]</default>
+      <summary>Recently inserted emoji and symbols, newest first</summary>
+    </key>
+    <key name="private-mode" type="b">
+      <default>false</default>
+      <summary>Stop recording what you copy</summary>
+    </key>
+    <key name="excluded-apps" type="as">
+      <default>[]</default>
+      <summary>App IDs whose copies are never recorded</summary>
+    </key>
+    <key name="terminal-apps" type="as">
+      <default>['org.gnome.Ptyxis', 'org.gnome.Terminal', 'org.gnome.Console', 'com.mitchellh.ghostty', 'org.wezfurlong.wezterm', 'kitty', 'Alacritty', 'foot', 'com.raggesilver.BlackBox', 'org.kde.konsole', 'xterm']</default>
+      <summary>App IDs that paste with Ctrl+Shift+V</summary>
+    </key>
+    <key name="onboarded" type="b">
+      <default>false</default>
+      <summary>Whether the first-run notification was shown</summary>
+    </key>
+  </schema>
+</schemalist>

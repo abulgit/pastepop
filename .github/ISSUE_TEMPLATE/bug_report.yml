@@ -1,0 +1,47 @@
+name: Bug report
+description: Something in PastePop doesn't work as expected
+labels: [bug]
+body:
+  - type: input
+    id: gnome
+    attributes:
+      label: GNOME version
+      description: Output of `gnome-shell --version`
+    validations:
+      required: true
+  - type: input
+    id: distro
+    attributes:
+      label: Distribution
+      placeholder: Fedora 44
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: PastePop version
+      description: Shown in PastePop's settings under About, or by `gnome-extensions info pastepop@abulgit`
+    validations:
+      required: true
+  - type: input
+    id: app
+    attributes:
+      label: App where it happened
+      placeholder: Firefox, GNOME Terminal, VS Code…
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      description: What you did, what you expected, and what happened instead.
+      placeholder: |
+        1.
+        2.
+        3.
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs
+      description: Output of `journalctl -b -o cat /usr/bin/gnome-shell | grep -i pastepop`
+      render: text

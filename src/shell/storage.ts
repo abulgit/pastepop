@@ -5,6 +5,13 @@ import {parseIndex, type Item} from '../core/history.ts';
 
 const SAVE_DELAY = 1000;
 
+Gio._promisify(Gio.File.prototype, 'load_contents_async');
+Gio._promisify(Gio.File.prototype, 'load_bytes_async');
+Gio._promisify(Gio.File.prototype, 'replace_contents_async');
+Gio._promisify(Gio.File.prototype, 'delete_async');
+Gio._promisify(Gio.File.prototype, 'enumerate_children_async');
+Gio._promisify(Gio.File.prototype, 'set_display_name_async');
+
 function isError(e: unknown, code: number): boolean {
     return e instanceof GLib.Error && e.matches(Gio.IOErrorEnum, code);
 }
@@ -13,13 +20,13 @@ function isError(e: unknown, code: number): boolean {
 export function logError(what: string): (e: unknown) => void {
     return e => {
         if (!isError(e, Gio.IOErrorEnum.CANCELLED))
-            console.error(`CtrlV: ${what} failed`, e);
+            console.error(`PastePop: ${what} failed`, e);
     };
 }
 
 /** history.json holds the index; images and long text go to blobs/<hash>. */
 export class Storage {
-    private readonly _dir = Gio.File.new_for_path(GLib.build_filenamev([GLib.get_user_data_dir(), 'ctrlv']));
+    private readonly _dir = Gio.File.new_for_path(GLib.build_filenamev([GLib.get_user_data_dir(), 'pastepop']));
     private readonly _index = this._dir.get_child('history.json');
     private readonly _blobs = this._dir.get_child('blobs');
     private readonly _cancellable = new Gio.Cancellable();
@@ -32,31 +39,18 @@ export class Storage {
 
     constructor(items: () => Item[]) {
         this._items = items;
-        Gio._promisify(Gio.File.prototype, 'load_contents_async');
-        Gio._promisify(Gio.File.prototype, 'load_bytes_async');
-        Gio._promisify(Gio.File.prototype, 'replace_contents_async');
-        Gio._promisify(Gio.File.prototype, 'make_directory_async');
-        Gio._promisify(Gio.File.prototype, 'delete_async');
-        Gio._promisify(Gio.File.prototype, 'enumerate_children_async');
-        Gio._promisify(Gio.File.prototype, 'set_display_name_async');
     }
 
     /**
      * Falls back to the backup if the index is corrupt; unreadable files are renamed aside.
-     * Without `persist`, unpinned items don't outlive a reboot. Items whose blob is gone are dropped.
+     * With `untilRestart`, unpinned items from an earlier boot are left out. Items whose blob is gone are dropped.
      */
-    async load(persist: boolean): Promise<Item[]> {
+    async load(untilRestart: boolean): Promise<Item[]> {
         const [boot] = await Gio.File.new_for_path('/proc/sys/kernel/random/boot_id').load_contents_async(this._cancellable);
         this._boot = new TextDecoder().decode(boot).trim();
 
-        for (const dir of [this._dir, this._blobs]) {
-            try {
-                await dir.make_directory_async(GLib.PRIORITY_DEFAULT, this._cancellable);
-            } catch (e) {
-                if (!isError(e, Gio.IOErrorEnum.EXISTS))
-                    throw e;
-            }
-        }
+        // Private, as it holds what was copied.
+        GLib.mkdir_with_parents(this._blobs.get_path()!, 0o700);
 
         let index = null;
         for (const file of [this._index, this._dir.get_child('history.json~')]) {
@@ -75,25 +69,25 @@ export class Storage {
                     GLib.PRIORITY_DEFAULT, this._cancellable);
             }
         }
+        const blobs = new Set(await this._blobNames());
         this._loaded = true;
         if (!index)
             return [];
-        const keepUnpinned = persist || index.boot === this._boot;
-        const blobs = new Set(await this._blobNames());
+        const keepUnpinned = !untilRestart || index.boot === this._boot;
         return index.items.filter(i => (keepUnpinned || i.pinned) && (!i.blob || blobs.has(i.hash)));
     }
 
-    /** Deletes blobs that nothing in the history refers to, such as unpinned images from before a reboot. */
-    async deleteOrphans(isKept: (hash: string) => boolean): Promise<void> {
+    /** Deletes blobs that nothing refers to, such as unpinned images from before a reboot. */
+    async deleteOrphans(isNeeded: (hash: string) => boolean): Promise<void> {
         for (const name of await this._blobNames()) {
-            if (!isKept(name))
+            if (!isNeeded(name))
                 this.deleteBlob(name);
         }
     }
 
     /** Debounced, so a burst of changes is written once. */
     save(): void {
-        if (this._saveId || !this._loaded)
+        if (this._saveId || !this._loaded || this._cancellable.is_cancelled())
             return;
         this._saveId = GLib.timeout_add(GLib.PRIORITY_DEFAULT, SAVE_DELAY, () => {
             this._saveId = 0;
@@ -148,6 +142,8 @@ export class Storage {
             Gio.FileQueryInfoFlags.NONE, GLib.PRIORITY_DEFAULT, this._cancellable);
         for await (const info of children)
             names.push(info.get_name());
+        // GJS doesn't pass the cancellable on to each step of the iteration.
+        this._cancellable.set_error_if_cancelled();
         return names;
     }
 
