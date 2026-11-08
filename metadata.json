@@ -1,7 +1,7 @@
 {
   "uuid": "pastepop@abulgit",
   "name": "PastePop – Clipboard History",
-  "description": "Windows-style Win+V clipboard history for GNOME. Press your shortcut and a small popup opens at the text cursor; pick an item and it is pasted into the app you were using.\n\n* Text, images and copied files, with pins and search\n* Emoji, symbols and kaomoji, typed straight into the app\n* Skips passwords marked by password managers, apps you exclude, and everything while private mode is on\n\nPastePop reads the clipboard to keep a history, stored only on this computer in ~/.local/share/pastepop. Nothing leaves your computer.\n\nChoose a shortcut in the preferences, such as Super+V.",
+  "description": "Clipboard history like Windows' Win+V. It opens at the text cursor; pick an item to paste it.\n\nSupports text, images and files, with search, pins, emoji and symbols.\n\nPastePop reads the clipboard to keep a local history in ~/.local/share/pastepop. Nothing is sent anywhere.",
   "url": "https://github.com/abulgit/pastepop",
   "shell-version": ["50", "51"],
   "settings-schema": "org.gnome.shell.extensions.pastepop",
