@@ -1,0 +1,694 @@
+{
+  "baselineCommit": "30a50aad113e5809b05f363e751787752fe74df8",
+  "runtime": {
+    "runtime": "GJS",
+    "version": 18800,
+    "statistic": "median",
+    "samples": 30,
+    "iterations": 10
+  },
+  "benchmarks": [
+    {
+      "limit": 10,
+      "pins": 0,
+      "operation": "add",
+      "beforeMs": 0.006500000000000001,
+      "afterMs": 0.008150000000000001
+    },
+    {
+      "limit": 10,
+      "pins": 0,
+      "operation": "prune",
+      "beforeMs": 0.0011500000000000004,
+      "afterMs": 0.0011500000000000004
+    },
+    {
+      "limit": 10,
+      "pins": 0,
+      "operation": "expire",
+      "beforeMs": 0.017300000000000003,
+      "afterMs": 0.010800000000000004
+    },
+    {
+      "limit": 10,
+      "pins": 0,
+      "operation": "clear",
+      "beforeMs": 0.00485,
+      "afterMs": 0.003200000000000001
+    },
+    {
+      "limit": 10,
+      "pins": 0,
+      "operation": "load",
+      "beforeMs": 0.0038000000000000004,
+      "afterMs": 0.009400000000000002
+    },
+    {
+      "limit": 10,
+      "pins": 0,
+      "operation": "load-after-copy",
+      "beforeMs": 0.017750000000000002,
+      "afterMs": 0.016300000000000002
+    },
+    {
+      "limit": 10,
+      "pins": 1000,
+      "operation": "add",
+      "beforeMs": 0.027899999999999994,
+      "afterMs": 0.042899999999999994
+    },
+    {
+      "limit": 10,
+      "pins": 1000,
+      "operation": "prune",
+      "beforeMs": 0.0036000000000000008,
+      "afterMs": 0.0036000000000000003
+    },
+    {
+      "limit": 10,
+      "pins": 1000,
+      "operation": "expire",
+      "beforeMs": 0.04764999999999999,
+      "afterMs": 0.0518
+    },
+    {
+      "limit": 10,
+      "pins": 1000,
+      "operation": "clear",
+      "beforeMs": 0.04374999999999999,
+      "afterMs": 0.023199999999999995
+    },
+    {
+      "limit": 10,
+      "pins": 1000,
+      "operation": "load",
+      "beforeMs": 0.03585000000000001,
+      "afterMs": 0.03720000000000001
+    },
+    {
+      "limit": 10,
+      "pins": 1000,
+      "operation": "load-after-copy",
+      "beforeMs": 0.10900000000000001,
+      "afterMs": 0.09019999999999997
+    },
+    {
+      "limit": 10,
+      "pins": 10000,
+      "operation": "add",
+      "beforeMs": 0.23815000000000003,
+      "afterMs": 0.48955
+    },
+    {
+      "limit": 10,
+      "pins": 10000,
+      "operation": "prune",
+      "beforeMs": 0.020399999999999998,
+      "afterMs": 0.0203
+    },
+    {
+      "limit": 10,
+      "pins": 10000,
+      "operation": "expire",
+      "beforeMs": 0.4496,
+      "afterMs": 0.32035
+    },
+    {
+      "limit": 10,
+      "pins": 10000,
+      "operation": "clear",
+      "beforeMs": 0.41809999999999997,
+      "afterMs": 0.25285
+    },
+    {
+      "limit": 10,
+      "pins": 10000,
+      "operation": "load",
+      "beforeMs": 0.32385,
+      "afterMs": 0.49715
+    },
+    {
+      "limit": 10,
+      "pins": 10000,
+      "operation": "load-after-copy",
+      "beforeMs": 1.8022000000000002,
+      "afterMs": 0.8766499999999999
+    },
+    {
+      "limit": 100,
+      "pins": 0,
+      "operation": "add",
+      "beforeMs": 0.005200000000000001,
+      "afterMs": 0.004900000000000002
+    },
+    {
+      "limit": 100,
+      "pins": 0,
+      "operation": "prune",
+      "beforeMs": 0.0011000000000000003,
+      "afterMs": 0.0011000000000000003
+    },
+    {
+      "limit": 100,
+      "pins": 0,
+      "operation": "expire",
+      "beforeMs": 0.016700000000000003,
+      "afterMs": 0.023199999999999995
+    },
+    {
+      "limit": 100,
+      "pins": 0,
+      "operation": "clear",
+      "beforeMs": 0.013599999999999998,
+      "afterMs": 0.007600000000000001
+    },
+    {
+      "limit": 100,
+      "pins": 0,
+      "operation": "load",
+      "beforeMs": 0.006100000000000001,
+      "afterMs": 0.00455
+    },
+    {
+      "limit": 100,
+      "pins": 0,
+      "operation": "load-after-copy",
+      "beforeMs": 0.019849999999999996,
+      "afterMs": 0.0153
+    },
+    {
+      "limit": 100,
+      "pins": 1000,
+      "operation": "add",
+      "beforeMs": 0.028200000000000003,
+      "afterMs": 0.048949999999999994
+    },
+    {
+      "limit": 100,
+      "pins": 1000,
+      "operation": "prune",
+      "beforeMs": 0.006999999999999999,
+      "afterMs": 0.0037000000000000006
+    },
+    {
+      "limit": 100,
+      "pins": 1000,
+      "operation": "expire",
+      "beforeMs": 0.3087000000000001,
+      "afterMs": 0.04694999999999999
+    },
+    {
+      "limit": 100,
+      "pins": 1000,
+      "operation": "clear",
+      "beforeMs": 0.0249,
+      "afterMs": 0.013599999999999998
+    },
+    {
+      "limit": 100,
+      "pins": 1000,
+      "operation": "load",
+      "beforeMs": 0.038250000000000006,
+      "afterMs": 0.04089999999999999
+    },
+    {
+      "limit": 100,
+      "pins": 1000,
+      "operation": "load-after-copy",
+      "beforeMs": 0.13119999999999998,
+      "afterMs": 0.07225000000000001
+    },
+    {
+      "limit": 100,
+      "pins": 10000,
+      "operation": "add",
+      "beforeMs": 0.23935,
+      "afterMs": 0.28545
+    },
+    {
+      "limit": 100,
+      "pins": 10000,
+      "operation": "prune",
+      "beforeMs": 0.020999999999999998,
+      "afterMs": 0.0329
+    },
+    {
+      "limit": 100,
+      "pins": 10000,
+      "operation": "expire",
+      "beforeMs": 2.9646,
+      "afterMs": 0.3589
+    },
+    {
+      "limit": 100,
+      "pins": 10000,
+      "operation": "clear",
+      "beforeMs": 0.20735000000000003,
+      "afterMs": 0.0797
+    },
+    {
+      "limit": 100,
+      "pins": 10000,
+      "operation": "load",
+      "beforeMs": 0.3328500000000001,
+      "afterMs": 0.48640000000000005
+    },
+    {
+      "limit": 100,
+      "pins": 10000,
+      "operation": "load-after-copy",
+      "beforeMs": 1.771,
+      "afterMs": 0.9579
+    }
+  ],
+  "memory": {
+    "baseline": {
+      "firstPage": {
+        "Rss_KiB": 338864,
+        "Pss_KiB": 273302,
+        "Private_Dirty_KiB": 186244,
+        "stageActors": 2731,
+        "loaded": true,
+        "history": 2000,
+        "pinned": 2000,
+        "popupOpen": true,
+        "tab": "clipboard",
+        "rows": 50,
+        "rowLimit": 50,
+        "symbolViews": [
+          {
+            "name": "emoji",
+            "cells": 112
+          },
+          {
+            "name": "symbols",
+            "cells": 101
+          },
+          {
+            "name": "kaomoji",
+            "cells": 28
+          }
+        ]
+      },
+      "endOpen": {
+        "Rss_KiB": 488624,
+        "Pss_KiB": 423062,
+        "Private_Dirty_KiB": 336004,
+        "stageActors": 26131,
+        "loaded": true,
+        "history": 2000,
+        "pinned": 2000,
+        "popupOpen": true,
+        "tab": "clipboard",
+        "rows": 2000,
+        "rowLimit": null,
+        "symbolViews": [
+          {
+            "name": "emoji",
+            "cells": 112
+          },
+          {
+            "name": "symbols",
+            "cells": 101
+          },
+          {
+            "name": "kaomoji",
+            "cells": 28
+          }
+        ]
+      },
+      "closed": {
+        "Rss_KiB": 648072,
+        "Pss_KiB": 582510,
+        "Private_Dirty_KiB": 495452,
+        "stageActors": 26131,
+        "loaded": true,
+        "history": 2000,
+        "pinned": 2000,
+        "popupOpen": false,
+        "tab": "clipboard",
+        "rows": 2000,
+        "rowLimit": null,
+        "symbolViews": [
+          {
+            "name": "emoji",
+            "cells": 112
+          },
+          {
+            "name": "symbols",
+            "cells": 101
+          },
+          {
+            "name": "kaomoji",
+            "cells": 28
+          }
+        ]
+      },
+      "after20Cycles": {
+        "Rss_KiB": 643368,
+        "Pss_KiB": 577806,
+        "Private_Dirty_KiB": 490748,
+        "stageActors": 2731,
+        "loaded": true,
+        "history": 2000,
+        "pinned": 2000,
+        "popupOpen": false,
+        "tab": "clipboard",
+        "rows": 50,
+        "rowLimit": 50,
+        "symbolViews": [
+          {
+            "name": "emoji",
+            "cells": 112
+          },
+          {
+            "name": "symbols",
+            "cells": 101
+          },
+          {
+            "name": "kaomoji",
+            "cells": 28
+          }
+        ]
+      }
+    },
+    "candidate": {
+      "firstPage": {
+        "Rss_KiB": 353144,
+        "Pss_KiB": 288159,
+        "Private_Dirty_KiB": 199344,
+        "stageActors": 2731,
+        "loaded": true,
+        "history": 2000,
+        "pinned": 2000,
+        "popupOpen": true,
+        "tab": "clipboard",
+        "rows": 50,
+        "rowLimit": 50,
+        "symbolViews": [
+          {
+            "name": "emoji",
+            "cells": 112
+          },
+          {
+            "name": "symbols",
+            "cells": 101
+          },
+          {
+            "name": "kaomoji",
+            "cells": 28
+          }
+        ]
+      },
+      "endOpen": {
+        "Rss_KiB": 499120,
+        "Pss_KiB": 434134,
+        "Private_Dirty_KiB": 345320,
+        "stageActors": 26129,
+        "loaded": true,
+        "history": 2000,
+        "pinned": 2000,
+        "popupOpen": true,
+        "tab": "clipboard",
+        "rows": 2000,
+        "rowLimit": null,
+        "symbolViews": [
+          {
+            "name": "emoji",
+            "cells": 112
+          },
+          {
+            "name": "symbols",
+            "cells": 101
+          },
+          {
+            "name": "kaomoji",
+            "cells": 28
+          }
+        ]
+      },
+      "closed": {
+        "Rss_KiB": 657296,
+        "Pss_KiB": 592310,
+        "Private_Dirty_KiB": 503496,
+        "stageActors": 2729,
+        "loaded": true,
+        "history": 2000,
+        "pinned": 2000,
+        "popupOpen": false,
+        "tab": "clipboard",
+        "rows": 50,
+        "rowLimit": 50,
+        "symbolViews": [
+          {
+            "name": "emoji",
+            "cells": 112
+          },
+          {
+            "name": "symbols",
+            "cells": 101
+          },
+          {
+            "name": "kaomoji",
+            "cells": 28
+          }
+        ]
+      },
+      "after20Cycles": {
+        "Rss_KiB": 654680,
+        "Pss_KiB": 589694,
+        "Private_Dirty_KiB": 500860,
+        "stageActors": 2729,
+        "loaded": true,
+        "history": 2000,
+        "pinned": 2000,
+        "popupOpen": false,
+        "tab": "clipboard",
+        "rows": 50,
+        "rowLimit": 50,
+        "symbolViews": [
+          {
+            "name": "emoji",
+            "cells": 112
+          },
+          {
+            "name": "symbols",
+            "cells": 101
+          },
+          {
+            "name": "kaomoji",
+            "cells": 28
+          }
+        ]
+      }
+    }
+  },
+  "nativeChecks": {
+    "baseline": [
+      "app focus",
+      "app clear",
+      "app copy",
+      "app copy",
+      "app copy",
+      "duplicate copy moves to front without duplication",
+      "keyboard pin",
+      "keyboard delete",
+      "keyboard undo",
+      "search filters history",
+      "Escape dismisses search first",
+      "Escape closes popup",
+      "app clear",
+      "actual Ctrl+1 paste into GTK4 editor",
+      "app clear",
+      "copy only leaves editor empty and closes popup",
+      "Clear all preserves pin",
+      "Undo button restores cleared history",
+      "app copy",
+      "private mode rejects new clipboard copy",
+      "app password",
+      "password-manager hint rejects capture",
+      "app image",
+      "PNG clipboard dimensions",
+      "app files",
+      "app clear",
+      "file reference plain-text paste",
+      "app clear",
+      "emoji inserted into GTK editor",
+      "all symbol tabs load",
+      "large history starts with first page",
+      "memory check closes popup",
+      "20 shortcut open/close cycles"
+    ],
+    "candidate": [
+      "app focus",
+      "app clear",
+      "app copy",
+      "app copy",
+      "app copy",
+      "duplicate copy moves to front without duplication",
+      "keyboard pin",
+      "keyboard delete",
+      "keyboard undo",
+      "search filters history",
+      "Escape dismisses search first",
+      "Escape closes popup",
+      "app clear",
+      "actual Ctrl+1 paste into GTK4 editor",
+      "app clear",
+      "copy only leaves editor empty and closes popup",
+      "Clear all preserves pin",
+      "Undo button restores cleared history",
+      "app copy",
+      "private mode rejects new clipboard copy",
+      "app password",
+      "password-manager hint rejects capture",
+      "app image",
+      "PNG clipboard dimensions",
+      "app files",
+      "app clear",
+      "file reference plain-text paste",
+      "app clear",
+      "emoji inserted into GTK editor",
+      "all symbol tabs load",
+      "large history starts with first page",
+      "memory check closes popup",
+      "closing releases extra history rows",
+      "20 shortcut open/close cycles"
+    ]
+  },
+  "privacyRace": {
+    "baseline": {
+      "version": "baseline",
+      "marker": "privacy-in-flight-baseline-21a64bf4eee94835bb3eea824fb09b34",
+      "delay_ms": 1000,
+      "passed": true,
+      "initial": {
+        "count": 2000,
+        "matches": 0,
+        "private": false
+      },
+      "transfer_at_toggle": {
+        "started": true,
+        "requests": 2,
+        "completed": 0,
+        "cancelled": 0,
+        "started_us": 1795878609
+      },
+      "privacy_enabled_us": 1795983513,
+      "toggle_after_start_ms": 104.904,
+      "while_private": {
+        "count": 2001,
+        "matches": 1,
+        "private": true
+      },
+      "transfer_after_delay": {
+        "started": true,
+        "requests": 2,
+        "completed": 2,
+        "cancelled": 0,
+        "started_us": 1795878609,
+        "completed_us": 1796879664
+      },
+      "after_turning_off": {
+        "count": 2001,
+        "matches": 1,
+        "private": false
+      }
+    },
+    "candidate": {
+      "version": "candidate",
+      "marker": "privacy-in-flight-candidate-cb3a393ec5314ee7922fc35b9688b05d",
+      "delay_ms": 1000,
+      "passed": true,
+      "initial": {
+        "count": 2000,
+        "matches": 0,
+        "private": false
+      },
+      "transfer_at_toggle": {
+        "started": true,
+        "requests": 2,
+        "completed": 0,
+        "cancelled": 0,
+        "started_us": 1701798741
+      },
+      "privacy_enabled_us": 1701906951,
+      "toggle_after_start_ms": 108.21,
+      "while_private": {
+        "count": 2000,
+        "matches": 0,
+        "private": true
+      },
+      "transfer_after_delay": {
+        "started": true,
+        "requests": 2,
+        "completed": 2,
+        "cancelled": 0,
+        "started_us": 1701798741,
+        "completed_us": 1702801716
+      },
+      "after_turning_off": {
+        "count": 2000,
+        "matches": 0,
+        "private": false
+      }
+    }
+  },
+  "nativeExtras": {
+    "version": "candidate",
+    "checks": [
+      {
+        "name": "Actual excluded-app capture filter",
+        "passed": true,
+        "details": {
+          "derived_app_id": "window:1",
+          "excluded_copy_retained": false,
+          "copy_after_removing_exclusion_retained": true
+        }
+      },
+      {
+        "name": "Newer copy cancels stale slow clipboard transfer",
+        "passed": true,
+        "details": {
+          "newer_copy_retained": true,
+          "stale_copy_retained": false,
+          "slow_transfer_started_us": 2086394337
+        }
+      },
+      {
+        "name": "Blank 4 KiB prefix retains and pastes long text exactly",
+        "passed": true,
+        "details": {
+          "bytes": 4138,
+          "inline_prefix_blank": true,
+          "stored_as_blob": true,
+          "exact_text_paste": true
+        }
+      },
+      {
+        "name": "Text exceeding 4 MiB is rejected",
+        "passed": true,
+        "details": {
+          "offered_bytes": 4194346,
+          "limit_bytes": 4194304,
+          "retained": false
+        }
+      },
+      {
+        "name": "PNG history selection restores exact clipboard bytes",
+        "passed": true,
+        "details": {
+          "captured_hash": "e0aa3ca4366edd54a6d976a41c5424b6f53d7c949d0d4323e4c68295265c0cc4",
+          "expected_sha256": "e0aa3ca4366edd54a6d976a41c5424b6f53d7c949d0d4323e4c68295265c0cc4",
+          "restored": {
+            "bytes": 11689,
+            "sha256": "e0aa3ca4366edd54a6d976a41c5424b6f53d7c949d0d4323e4c68295265c0cc4"
+          },
+          "exact_bytes": true
+        }
+      }
+    ],
+    "passed": 5,
+    "failed": 0
+  }
+}
