@@ -59,7 +59,10 @@ export function createItem(kind: Kind, data: Uint8Array, sha256: Sha256): Item |
     let text = new TextDecoder().decode(blob ? data.subarray(0, INLINE_LIMIT) : data);
     if (kind === 'files')
         text = text.split(/[\r\n\0]+/).slice(1).filter(Boolean).join('\n');
-    return text.trim() ? {hash, kind, text, blob, pinned: false, time} : null;
+    // A blank prefix doesn't mean the full text is blank.
+    if (!text.trim() && (!blob || !new TextDecoder().decode(data).trim()))
+        return null;
+    return {hash, kind, text, blob, pinned: false, time};
 }
 
 function decode(text: string): string {
@@ -105,8 +108,9 @@ export function parseIndex(json: string): Index {
             // The hash becomes a file name, so it must not be able to escape the blob directory.
             return typeof i?.hash === 'string' && /^[\w-]+$/.test(i.hash) &&
                 KINDS.includes(i.kind) && typeof i.text === 'string' &&
-                typeof i.blob === 'boolean' && typeof i.pinned === 'boolean' && typeof i.time === 'number' &&
-                (i.size === undefined || Array.isArray(i.size) && i.size.length === 2 && i.size.every(Number.isInteger));
+                typeof i.blob === 'boolean' && typeof i.pinned === 'boolean' && Number.isFinite(i.time) &&
+                (i.size === undefined || Array.isArray(i.size) && i.size.length === 2 &&
+                    i.size.every(n => Number.isSafeInteger(n) && n > 0));
         }),
     };
 }
@@ -138,7 +142,13 @@ export class History {
 
     /** Whether the history or an item that can still be restored refers to a blob. */
     needsBlob(hash: string): boolean {
-        return this.has(hash) || [...this._removed.keys()].some(i => i.hash === hash);
+        if (this.has(hash))
+            return true;
+        for (const item of this._removed.keys()) {
+            if (item.hash === hash)
+                return true;
+        }
+        return false;
     }
 
     /** Copying something again moves it to the top and keeps its pin. */
@@ -153,7 +163,13 @@ export class History {
 
     /** Appends saved items behind anything copied while they were loading. */
     load(items: Item[]): void {
-        this.items.push(...items.filter(i => !this.has(i.hash)));
+        const seen = new Set(this.items.map(i => i.hash));
+        for (const item of items) {
+            if (!seen.has(item.hash)) {
+                this.items.push(item);
+                seen.add(item.hash);
+            }
+        }
         this._trim(Date.now());
         this._changed();
     }
@@ -168,9 +184,14 @@ export class History {
     }
 
     clear(): Item[] {
-        const removed = this.items.filter(i => !i.pinned);
-        removed.forEach(i => this._removed.set(i, this.items.indexOf(i)));
-        this.items = this.items.filter(i => i.pinned);
+        const removed: Item[] = [];
+        this.items = this.items.filter((item, index) => {
+            if (item.pinned)
+                return true;
+            removed.push(item);
+            this._removed.set(item, index);
+            return false;
+        });
         this._changed();
         return removed;
     }
@@ -197,10 +218,18 @@ export class History {
     /** Makes removals final, deleting the blobs nothing else refers to. */
     purge(items: Item[]): void {
         items.forEach(i => this._removed.delete(i));
-        for (const hash of new Set(items.filter(i => i.blob).map(i => i.hash))) {
-            if (!this.needsBlob(hash))
-                this._deleteBlob(hash);
-        }
+        const hashes = new Set(items.filter(i => i.blob).map(i => i.hash));
+        if (hashes.size === 0)
+            return;
+        // Most survivors are unrelated; deleting absent keys is costly in SpiderMonkey.
+        this.items.forEach(item => {
+            if (hashes.has(item.hash))
+                hashes.delete(item.hash);
+        });
+        for (const item of this._removed.keys())
+            hashes.delete(item.hash);
+        for (const hash of hashes)
+            this._deleteBlob(hash);
     }
 
     togglePin(item: Item): void {
@@ -209,6 +238,7 @@ export class History {
         if (!item.pinned) {
             item.time = Date.now();
             this.items = [item, ...this.items.filter(i => i !== item)];
+            this._trim(item.time);
         }
         this._changed();
     }
@@ -244,7 +274,8 @@ export class History {
             .filter((item, index) => index >= this._limit || now - item.time > this._maxAge);
         if (dropped.length === 0)
             return false;
-        this.items = this.items.filter(i => !dropped.includes(i));
+        const removed = new Set(dropped);
+        this.items = this.items.filter(i => !removed.has(i));
         this.purge(dropped);
         return true;
     }

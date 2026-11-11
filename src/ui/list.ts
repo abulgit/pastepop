@@ -173,6 +173,10 @@ export class ListView implements View {
         // Closed rather than destroyed: the menu item being clicked may be what closes the popup.
         this._menu?.close();
         this._toast.flush();
+        // End and scrolling can build many rows, including image textures. Keep only the first page while hidden.
+        this._limit = PAGE;
+        if (this._rows.size > PAGE)
+            this.filter(this._query);
     }
 
     destroy(): void {

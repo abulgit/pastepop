@@ -59,6 +59,15 @@ test('createItem reads copied files as a URI list', () => {
     assert.deepEqual(fileNames(files.text), ['b c.txt', 'd']);
 });
 
+test('long text is kept when only its preview is blank', () => {
+    const content = `${' '.repeat(4096)}important text`;
+    const item = createItem('text', bytes(content), sha256);
+    assert.equal(item?.blob, true);
+    assert.equal(item.text, ' '.repeat(4096));
+    assert.equal(item.hash, sha256(bytes(content)));
+    assert.equal(createItem('text', bytes(' '.repeat(5000)), sha256), null);
+});
+
 test('preview keeps about three wrapped lines and ellipsizes', () => {
     assert.equal(preview('  one\r\ntwo  '), 'one\ntwo');
     assert.equal(preview('1\n2\n3\n4'), '1\n2\n3…');
@@ -118,6 +127,24 @@ test('load appends saved items behind new ones', () => {
     h.add(text('new'));
     h.load([text('old'), text('new')]);
     assert.deepEqual(texts(h), ['new', 'old']);
+});
+
+test('load deduplicates saved items and keeps the version copied while loading', () => {
+    const {h} = history();
+    h.add(text('new', true));
+    h.load([text('old', true), text('old'), text('new')]);
+    assert.deepEqual(h.items.map(i => [i.text, i.pinned]), [['new', true], ['old', true]]);
+});
+
+test('load handles a large pinned history without an argument limit', () => {
+    const {h} = history();
+    const items = Array.from({length: 150_000}, (_, i) => ({
+        hash: `pin${i}`, kind: 'text' as const, text: `${i}`, blob: false, pinned: true, time: i,
+    }));
+    h.load(items);
+    assert.equal(h.items.length, items.length);
+    assert.equal(h.items[0], items[0]);
+    assert.equal(h.items.at(-1), items.at(-1));
 });
 
 test('clear keeps pins, returns what went and keeps its blobs', () => {
@@ -182,6 +209,14 @@ test('unpinning counts as copying again', () => {
     assert.deepEqual(texts(h), ['old pin']);
 });
 
+test('unpinning enforces the limit immediately and keeps other pins', () => {
+    const {h, deleted} = history(1);
+    h.load([text('keep pin', true), text('unpin', true), image('old')]);
+    h.togglePin(h.items[1]);
+    assert.deepEqual(texts(h), ['unpin', 'keep pin']);
+    assert.deepEqual(deleted, ['old']);
+});
+
 test('purge deletes the blobs that nothing else needs', () => {
     const {h, deleted} = history();
     const x = image('x');
@@ -195,6 +230,21 @@ test('purge deletes the blobs that nothing else needs', () => {
     h.purge([x, y]);
     assert.deepEqual(deleted, ['x'], 'y was copied again');
     assert.equal(h.needsBlob('x'), false);
+});
+
+test('purge keeps a blob that another undoable removal still needs', () => {
+    const {h, deleted} = history();
+    const first = image('same');
+    const second = image('same');
+    h.add(first);
+    h.remove(first);
+    h.add(second);
+    h.remove(second);
+    h.purge([first]);
+    assert.deepEqual(deleted, []);
+    assert.equal(h.needsBlob('same'), true);
+    h.purge([second]);
+    assert.deepEqual(deleted, ['same']);
 });
 
 test('togglePin', () => {
@@ -218,8 +268,10 @@ test('parseIndex drops malformed entries and unsafe hashes', () => {
     const good = text('ok');
     const sized = {...image('i'), size: [3, 4]};
     const json = JSON.stringify({boot: 'b', items: [good, sized, {...good, hash: '../x'}, {...sized, size: [3]},
+        {...sized, size: [0, 4]}, {...sized, size: [-1, 4]}, {...sized, size: [Number.MAX_VALUE, 4]},
         {...good, time: undefined}, {hash: 'y'}, null]});
     assert.deepEqual(parseIndex(json), {boot: 'b', items: [good, sized]});
     assert.deepEqual(parseIndex('{}'), {boot: '', items: []});
+    assert.deepEqual(parseIndex(JSON.stringify({items: [good]}).replace(`"time":${good.time}`, '"time":1e400')).items, []);
     assert.throws(() => parseIndex('{'));
 });
