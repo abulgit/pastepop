@@ -20,13 +20,16 @@ function sha256(data: Uint8Array): string {
 /** Reads each new CLIPBOARD owner (never PRIMARY) unless it's ours, a password, private or from an excluded app. */
 export class Monitor {
     private readonly _selection = global.display.get_selection();
+    private readonly _settings: Gio.Settings;
     private readonly _ownerChangedId: number;
+    private readonly _privateChangedId: number;
     private _cancellable: Gio.Cancellable | null = null;
     private _rejected = false;
     private _ownerLost = false;
 
     constructor(settings: Gio.Settings, isOwn: (source: Meta.SelectionSource) => boolean,
         onCopy: (item: Item, data: Uint8Array) => void) {
+        this._settings = settings;
         this._ownerChangedId = this._selection.connect('owner-changed',
             (_selection, type: Meta.SelectionType, source: Meta.SelectionSource | null) => {
                 if (type !== Meta.SelectionType.SELECTION_CLIPBOARD)
@@ -48,6 +51,12 @@ export class Monitor {
                 if (!this._rejected)
                     this._read(mimes, onCopy).catch(logError('reading the clipboard'));
             });
+        this._privateChangedId = settings.connect('changed::private-mode', () => {
+            if (settings.get_boolean('private-mode')) {
+                this._rejected = true;
+                this._cancellable?.cancel();
+            }
+        });
     }
 
     private async _read(mimes: string[], onCopy: (item: Item, data: Uint8Array) => void): Promise<void> {
@@ -73,6 +82,7 @@ export class Monitor {
 
     destroy(): void {
         this._selection.disconnect(this._ownerChangedId);
+        this._settings.disconnect(this._privateChangedId);
         this._cancellable?.cancel();
     }
 }
